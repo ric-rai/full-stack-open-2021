@@ -9,11 +9,10 @@ const Display = ({ text, value }) => <p>{text + " " + value}</p>
 const Statistics = (props) => {
     const { good, neutral, bad } = props
     const sum = () => good + neutral + bad
-    const format = (v, _) => isNaN(v) ? _ : v.toFixed(2)
-    const average = () => format((good - bad) / sum(), 0)
-    const posPercent = () => format(good / sum() * 100, "_")
+    const average = () => ((good - bad) / sum()).toFixed(2)
+    const posPercent = () => (good / sum() * 100).toFixed(2)
 
-    return (
+    return sum() === 0 ? <p>No feedback given</p> : (
         <div>
             <Display text={"all"} value={sum()}/>
             <Display text={"average"} value={average()}/>
