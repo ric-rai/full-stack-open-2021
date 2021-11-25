@@ -15,6 +15,11 @@ const App = () => {
     const giveNeutral = () => () => setNeutral(neutral + 1)
     const giveBad = () => () => setBad(bad + 1)
 
+    const sum = () => good + neutral + bad
+    const format = (v, _) => isNaN(v) ? _ : v.toFixed(2)
+    const average = () => format((good - bad) / sum(), 0)
+    const posPercent = () => format(good / sum() * 100, "_")
+
     return (
         <div>
             <Header header={"Give feedback"}/>
@@ -24,6 +29,9 @@ const App = () => {
             <Display text={"good"} value={good}/>
             <Display text={"neutral"} value={neutral}/>
             <Display text={"bad"} value={bad}/>
+            <Display text={"all"} value={sum()}/>
+            <Display text={"average"} value={average()}/>
+            <Display text={"positive"} value={posPercent() + " %"}/>
         </div>
     )
 }
