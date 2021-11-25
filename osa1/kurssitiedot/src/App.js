@@ -2,8 +2,15 @@ import React from 'react'
 
 const Header = (props) => <h1>{props.course}</h1>
 
-const Content = (props) => <p>{props.part} {props.exercise}</p>
+const Content = (props) => (
+    <div>
+        <Part part={props.data[0].part} exercise={props.data[0].exercise} />
+        <Part part={props.data[1].part} exercise={props.data[1].exercise} />
+        <Part part={props.data[2].part} exercise={props.data[2].exercise} />
+    </div>
+)
 
+const Part = (props) => <p>{props.part} {props.exercise}</p>
 
 const Total = (props) => <p>Number of exercises {props.numberOfExercises}</p>
 
@@ -19,9 +26,8 @@ const App = () => {
     return (
         <div>
            <Header course={course} />
-            <Content part={part1} exercise={exercises1} />
-            <Content part={part2} exercise={exercises2} />
-            <Content part={part3} exercise={exercises3} />
+            <Content data={[1, 2, 3].map(n =>
+                ({part: eval("part" + n), exercise: eval("exercises" + n)}))} />
             <Total numberOfExercises={exercises1 + exercises2 + exercises3} />
         </div>
     )
