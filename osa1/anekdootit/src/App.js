@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
+const Header = ({ header }) => <h1>{header}</h1>
 const Button = ({ text, handleClick }) => <button onClick={handleClick}>{text}</button>
-
 const Anecdote = ({ anecdote }) => <p>{anecdote}</p>
 const Votes = ({ votes }) => <p>has {votes} votes</p>
 
@@ -24,10 +24,13 @@ const App = () => {
 
     return (
         <div>
+            <Header header={"Anecdote of the day"}/>
             <Anecdote anecdote={anecdotes[selected]}/>
             <Votes votes={votes[selected]}/>
             <Button text={"vote"} handleClick={handleVote()}/>
             <Button text={"next anecdote"} handleClick={handleClick()}/>
+            <Header header={"Anecdote with most votes"}/>
+            <Anecdote anecdote={anecdotes[votes.indexOf(Math.max(...votes))]}/>
         </div>
     )
 }
