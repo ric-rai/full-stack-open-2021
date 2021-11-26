@@ -20,7 +20,7 @@ const App = () => {
     const [votes, setVotes] = useState(new Array(anecdotes.length).fill(0))
 
     const handleClick = () => () => setSelected(Math.floor(Math.random() * anecdotes.length))
-    const handleVote = () => (a) => (a = [...votes]) && (a[selected] += 1) && setVotes(a)
+    const handleVote = () =>  (a) => (a = [...votes]) && (a[selected] += 1) && setVotes(a)
 
     return (
         <div>
