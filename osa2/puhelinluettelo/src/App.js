@@ -1,6 +1,24 @@
 import React, { useState } from 'react'
 
-const Person = ({name, numer}) => <p>{name} {numer}</p>
+const PersonForm = ({onSubmitHandler, inputs}) => (
+    <form onSubmit={onSubmitHandler}>
+        {inputs.map(i => <Input key={i.label} label={i.label} value={i.value} onChange={i.onChange}/> )}
+        <div>
+            <button type="submit">add</button>
+        </div>
+    </form>
+)
+
+const Input = ({label, value, onChange}) => (
+    <div>{label}:{" "}
+        <input value={value} onChange={onChange}/>
+    </div>
+)
+
+const Persons = ({persons}) =>
+    persons.map(p => <Person key={p.name} name={p.name} number={p.number}/>)
+
+const Person = ({name, number}) => <p>{name} {number}</p>
 
 const App = () => {
     const [persons, setPersons] = useState([
@@ -40,21 +58,14 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
-                <input value={currentFilter} onChange={handleFilterChange}/>
+                <Input label={'filter'} value={currentFilter} onChange={handleFilterChange}/>
             <h2>Add a new</h2>
-            <form onSubmit={addPerson}>
-                <div>name:
-                    <input value={newName} onChange={setValueWith(setNewName)}/>
-                </div>
-                <div> number:
-                    <input value={newNumber} onChange={setValueWith(setNewNumber)}/>
-                </div>
-                <div>
-                    <button type="submit">add</button>
-                </div>
-            </form>
+            <PersonForm onSubmitHandler={addPerson} inputs={[
+                {label: 'name', value: newName, onChange: setValueWith(setNewName)},
+                {label: 'number', value: newNumber, onChange: setValueWith(setNewNumber)}
+            ]}/>
             <h2>Numbers</h2>
-            {filtered.map(p => <Person key={p.name} name={p.name} numer={p.number}/>)}
+            <Persons persons={filtered}/>
         </div>
     )
 
