@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import axios from "axios"
 
 const PersonForm = ({onSubmitHandler, inputs}) => (
     <form onSubmit={onSubmitHandler}>
@@ -21,16 +22,16 @@ const Persons = ({persons}) =>
 const Person = ({name, number}) => <p>{name} {number}</p>
 
 const App = () => {
-    const [persons, setPersons] = useState([
-        {name: 'Arto Hellas', number: '040-123456'},
-        {name: 'Ada Lovelace', number: '39-44-5323523'},
-        {name: 'Dan Abramov', number: '12-43-234345'},
-        {name: 'Mary Poppendieck', number: '39-23-6423122'}
-    ])
+    const [persons, setPersons] = useState([])
     const [filtered, setFiltered] = useState(persons)
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [currentFilter, setCurrentFilter] = useState('')
+
+    const fetchPersons = () => void axios
+        .get('http://localhost:3001/persons')
+        .then(res => setPersons(res.data) || setFiltered([...res.data]))
+    useEffect(fetchPersons, [])
 
     const setValueWith = (setter) => e => setter(e.target.value)
 
