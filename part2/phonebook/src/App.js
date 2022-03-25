@@ -4,9 +4,7 @@ import axios from "axios"
 const PersonForm = ({onSubmitHandler, inputs}) => (
     <form onSubmit={onSubmitHandler}>
         {inputs.map(i => <Input key={i.label} label={i.label} value={i.value} onChange={i.onChange}/> )}
-        <div>
-            <button type="submit">add</button>
-        </div>
+        <div><button type="submit">add</button></div>
     </form>
 )
 
@@ -27,13 +25,12 @@ const App = () => {
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [currentFilter, setCurrentFilter] = useState('')
+    const setValueWith = (setter) => e => setter(e.target.value)
 
     const fetchPersons = () => void axios
         .get('http://localhost:3001/persons')
-        .then(res => setPersons(res.data) || setFiltered([...res.data]))
+        .then(res => (setPersons(res.data), setFiltered([...res.data])))
     useEffect(fetchPersons, [])
-
-    const setValueWith = (setter) => e => setter(e.target.value)
 
     const addPerson = e => {
         e.preventDefault()
@@ -49,11 +46,10 @@ const App = () => {
     }
 
     const handleFilterChange = e => changeFilter(e.target.value)
-    
-    const changeFilter = (value, updatedPersons = persons) => {
+    const changeFilter = (value, pers = persons) => {
         setCurrentFilter(value)
-        if (value === '') setFiltered([...updatedPersons])
-        else setFiltered(updatedPersons.filter(p => p.name.match(new RegExp(value, 'i'))))
+        if (value === '') setFiltered([...pers])
+        else setFiltered(pers.filter(p => p.name.match(new RegExp(value, 'i'))))
     } 
 
     return (
