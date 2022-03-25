@@ -7,10 +7,18 @@ const Input = ({label, value, onChange}) => (
     </div>
 )
 
-const CountryNames = ({names}) => 
-    names.map(n => <CountryName key={n} name={n}/>)
+const Message = ({msg}) => {
+    if (msg === '') return null
+    else return <div>{msg}</div>
+} 
 
-const CountryName = ({name}) => <div>{name}</div> 
+const CountryNames = ({names, handleCountryClick}) => 
+    names.map(n => <CountryName key={n} name={n} handleCountryClick={handleCountryClick}/>)
+
+const CountryName = ({name, handleCountryClick}) => 
+    <div>{name} <Button text="show" handleClick={handleCountryClick(name)}/></div> 
+
+const Button = ({text, handleClick}) => <button onClick={handleClick}>{text}</button>
 
 const CountryData = ({countryData}) => {
     if (!countryData) return null
@@ -33,7 +41,8 @@ const App = () => {
     const [countryNames, setCountryNames] = useState([])
     const [filtered, setFiltered] = useState([])
     const [currentFilter, setCurrentFilter] = useState('')
-    const [countryData, setCountryData] = useState(null)
+    const [validationMsg, setValidationMsg] = useState('')
+    const [country, setCountry] = useState(null)
 
     const fetchCountries = () => void axios
         .get('https://restcountries.com/v3.1/all')
@@ -41,26 +50,29 @@ const App = () => {
     useEffect(fetchCountries, [])
 
     const handleFilterChange = e => changeFilter(e.target.value)
-    const setFilteredHideCountry = filtered => (setFiltered(filtered), setCountryData(null))
-    const setCountryDataHideFiltered = name => 
-        (setCountryData(countries.find(c => c.name.common === name)), setFiltered([])) 
-    const filter = value => {
-        const f = countryNames.filter(n => n.match(new RegExp(value, 'i')))
-        if (f.length > 10) setFilteredHideCountry(["Too many matches, specify another filter"])
-        else if (f.length === 1) setCountryDataHideFiltered(f[0])
-        else setFilteredHideCountry(f)
+    const getCountry = name => countries.find(c => c.name.common === name) 
+    const setFilterStates = (f = [], msg = "", coName = null) => 
+        (setFiltered(f), setCountry(getCountry(coName)), setValidationMsg(msg))
+    const handleCountryClick = name => () => setFilterStates(filtered, "", name)
+    const filter = (value)  => {
+        const fNames = countryNames.filter(n => n.match(new RegExp(value, 'i')))
+        if (fNames.length > 10) setFilterStates([], "Too many matches, specify another filter")
+        else if (fNames.length === 1) setFilterStates([], "", fNames[0])
+        else setFilterStates(fNames, "", 
+            fNames.some(n => country && n === country.name.common) ? country.name.common : null)
     }
     const changeFilter = (value) => {
         setCurrentFilter(value)
-        if (value === '') setFiltered([]) 
-        else filter(value) 
+        if (value !== '') filter(value)
+        else setFilterStates() 
     } 
 
     return (
         <div>
             <Input label={'find countries'} value={currentFilter} onChange={handleFilterChange}/>
-            <CountryNames names={filtered}/>
-            <CountryData countryData={countryData}/>
+            <Message msg={validationMsg}/>
+            <CountryNames names={filtered} handleCountryClick={handleCountryClick}/>
+            <CountryData countryData={country}/>
         </div>
     )
 
