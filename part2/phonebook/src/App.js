@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from "axios"
+import personService from './services/persons'
 
 const PersonForm = ({onSubmitHandler, inputs}) => (
     <form onSubmit={onSubmitHandler}>
@@ -27,9 +27,8 @@ const App = () => {
     const [currentFilter, setCurrentFilter] = useState('')
     const setValueWith = (setter) => e => setter(e.target.value)
 
-    const fetchPersons = () => void axios
-        .get('http://localhost:3001/persons')
-        .then(res => (setPersons(res.data), setFiltered([...res.data])))
+    const fetchPersons = () => void personService.getAll()
+        .then(pers => (setPersons(pers), setFiltered([...pers])))
     useEffect(fetchPersons, [])
 
     const addPerson = e => {
@@ -38,13 +37,13 @@ const App = () => {
             alert(`${newName} is already added to phonebook`)
         else {
             const newPerson = {name: newName, number: newNumber}
-            const updatedPersons = persons.concat(newPerson)
-            setPersons(updatedPersons)
-            setNewName('')
-            changeFilter(currentFilter, [...updatedPersons])
-            setNewNumber('')
-            axios.post('http://localhost:3001/persons', newPerson)
-                 .then(res => console.log(newPerson, "added to database"))
+            personService.create(newPerson).then(returnedPerson => {
+                const updatedPersons = persons.concat(returnedPerson)
+                setPersons(updatedPersons)
+                setNewName('')
+                changeFilter(currentFilter, [...updatedPersons])
+                setNewNumber('')
+            })
         }
     }
 
