@@ -37,11 +37,14 @@ const App = () => {
         if (persons.map(p => p.name).includes(newName))
             alert(`${newName} is already added to phonebook`)
         else {
-            const updatedPersons = persons.concat({name: newName, number: newNumber})
+            const newPerson = {name: newName, number: newNumber}
+            const updatedPersons = persons.concat(newPerson)
             setPersons(updatedPersons)
             setNewName('')
             changeFilter(currentFilter, [...updatedPersons])
             setNewNumber('')
+            axios.post('http://localhost:3001/persons', newPerson)
+                 .then(res => console.log(newPerson, "added to database"))
         }
     }
 
