@@ -1,10 +1,10 @@
-import ax from 'axios'
+import axios from 'axios'
 const url = 'http://localhost:3001/persons'
 const pUrl = id => `${url}/${id}`
 
-const getAll = () => ax.get(url).then(r => r.data)
-const create = o => ax.post(url, o).then(r => r.data)
-const del = id => ax.delete(pUrl(id)).then(r => r.data)
-const update = (id, o) => ax.put(pUrl(id), o).then(r => r.data)
+const getAll = () => axios.get(url).then(r => r.data)
+const create = obj => axios.post(url, obj).then(r => r.data)
+const del = id => axios.delete(pUrl(id)).then(r => r.data)
+const update = obj => axios.put(pUrl(obj.id), obj).then(r => r.data)
 
 export default {getAll, create, del, update}

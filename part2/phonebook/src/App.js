@@ -7,7 +7,6 @@ const PersonForm = ({onSubmitHandler, inputs}) => (
         <div><button type="submit">add</button></div>
     </form>
 )
-
 const Input = props => <div>{props.label}:{" "} <input {...props}/></div>
 
 const Persons = ({persons, handleDelete}) => persons.map(p => 
@@ -21,10 +20,11 @@ const Button = ({text, handleClick}) => <button onClick={handleClick}>{text}</bu
 const App = () => {
     const [persons, setPersons] = useState([])
     const [filtered, setFiltered] = useState(persons)
+    const [filter, setFilter] = useState('')
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
-    const [filter, setFilter] = useState('')
-    const setValueWith = (setter) => e => setter(e.target.value)
+    const changeInputValue = (setter) => e => setter(e.target.value)
+    const getPerIdByName = name => persons.find(p => p.name === name)?.id
 
     const fetchPersons = () => void personService.getAll()
         .then(pers => (setPersons(pers), setFiltered([...pers])))
@@ -32,14 +32,15 @@ const App = () => {
 
     const addPerson = e => {
         e.preventDefault()
+        const p = {name: newName, number: newNumber, id: getPerIdByName(newName)}
         const resetForm = () => (setNewName(''), setNewNumber('')) 
-        const updPersons = pers => (setPersons(pers), changeFilter(filter, [...pers]))
-        if (persons.map(p => p.name).includes(newName))
-            alert(`${newName} is already added to phonebook`)
-        else personService.create({name: newName, number: newNumber}).then(p =>
-            (updPersons(persons.concat(p)), resetForm()))
+        const updPersons = pers => (setPersons(pers), changeFilter(filter, [...pers]), resetForm())
+        const updMsg = n => `${n} is already added to phonebook, replace the old number with a new one?`
+        if (p.id !== undefined && window.confirm(updMsg(p.name)))
+            personService.update(p.id, p).then(newP => 
+                updPersons(persons.map(p => p.id !== newP.id ? p : newP))) 
+        else personService.create(p).then(p => updPersons(persons.concat(p)))
     }
-    const getPerIdByName = name => persons.find(p => p.name === name).id
     const handleDelete = name => () => {
         const pers = persons.filter(p => p.name !== name)
         if (window.confirm(`Delete ${name}?`)) 
@@ -59,8 +60,8 @@ const App = () => {
                 <Input label={'filter'} value={filter} onChange={handleFilterChange}/>
             <h2>Add a new</h2>
             <PersonForm onSubmitHandler={addPerson} inputs={[
-                {label: 'name', value: newName, onChange: setValueWith(setNewName)},
-                {label: 'number', value: newNumber, onChange: setValueWith(setNewNumber)}
+                {label: 'name', value: newName, onChange: changeInputValue(setNewName)},
+                {label: 'number', value: newNumber, onChange: changeInputValue(setNewNumber)}
             ]}/>
             <h2>Numbers</h2>
             <Persons persons={filtered} handleDelete={handleDelete}/>
