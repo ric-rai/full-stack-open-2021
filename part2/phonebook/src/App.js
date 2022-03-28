@@ -8,16 +8,13 @@ const PersonForm = ({onSubmitHandler, inputs}) => (
     </form>
 )
 const Input = props => <div>{props.label}:{" "} <input {...props}/></div>
-
 const Persons = ({persons, handleDelete}) => persons.map(p => 
     <Person {...p} key={p.name} handleDelete={handleDelete}/>)
-
 const Person = ({name, number, handleDelete}) => 
     <div>{name} {number} <Button text={"delete"} handleClick={handleDelete(name)}/></div> 
-
 const Button = ({text, handleClick}) => <button onClick={handleClick}>{text}</button>
-
-const Notification = ({msg}) => msg === null ? null : <div className='success'>{msg}</div>
+const Notification = ({msg, color}) => msg === undefined 
+    ? null : <div className='notification' style={{'color': color}}>{msg}</div>
 
 const App = () => {
     const [persons, setPersons] = useState([])
@@ -25,14 +22,11 @@ const App = () => {
     const [filter, setFilter] = useState('')
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
-    const [msg, setMsg] = useState(null)
+    const [msgObj, setMsgObj] = useState(null)
     const changeInputValue = (setter) => e => setter(e.target.value)
     const getPerIdByName = name => persons.find(p => p.name === name)?.id
     const setPersonStates = pers => (setPersons(pers), changeFilter(filter, [...pers])) 
-
-    const fetchPersons = () => void personService.getAll()
-        .then(pers => (setPersons(pers), setFiltered([...pers])))
-    useEffect(fetchPersons, [])
+    useEffect(() => void personService.getAll().then(setPersonStates), [])
 
     const addPerson = e => {
         e.preventDefault()
@@ -40,25 +34,26 @@ const App = () => {
         const setPerStatesResetForm = pers => (setPersonStates(pers), setNewName(''), setNewNumber(''))
         const getUpdPersons = newP => persons.map(p => p.id !== newP.id ? p : newP)
         const isUpdMsg = p => `${p.name} is already added to phonebook, replace the old number with a new one?`
-        const notify = msg => (setMsg(msg), setTimeout(() => setMsg(null), 3000))
-        const updPerson = p => (setPerStatesResetForm(getUpdPersons(p)), notify('Updated ' + p.name))
-        const addPerson = p => (setPerStatesResetForm(persons.concat(p)), notify('Added ' + p.name))
-        const isUpdate = p => p.id !== undefined && window.confirm(isUpdMsg(p)) 
-        isUpdate(p) ? personService.update(p).then(updPerson) : personService.create(p).then(addPerson)
+        const notify = (msg, color) => (setMsgObj({msg, color}), setTimeout(() => setMsgObj(null), 3000))
+        const updPerson = p => (setPerStatesResetForm(getUpdPersons(p)), notify(`Updated ${p.name}`))
+        const addPerson = p => (setPerStatesResetForm(persons.concat(p)), notify(`Added ${p.name}`))
+        if (p.id === undefined) personService.create(p).then(addPerson) 
+        else if (window.confirm(isUpdMsg(p))) personService.update(p).then(updPerson)
+            .catch(() => notify(`Information of ${p.name} has already been removed from the server`, 'red'))
     }
     const handleDelete = name => () => (
         window.confirm(`Delete ${name}?`) ? personService.del(getPerIdByName(name))
-            .then(() => setPersonStates(persons.filter(p => p.name !== name))) : undefined
+            .then(() => setPersonStates(persons.filter(p => p.name !== name))) : undefined 
     )
     const changeFilter = (value, pers = persons) => (
         setFilter(value), setFiltered(value === '' 
-            ? [...pers] : pers.filter(p => p.name.match(new RegExp(value, 'i'))))
+            ? [...pers] : pers.filter(p => p.name.match(new RegExp(value, 'i'))) )
     ) 
     return (
         <div>
             <h2>Phonebook</h2>
                 <Input label={'filter'} value={filter} onChange={e => changeFilter(e.target.value)}/>
-            <Notification msg={msg}/>
+            <Notification {...msgObj}/>
             <h2>Add a new</h2>
             <PersonForm onSubmitHandler={addPerson} inputs={[
                 {label: 'name', value: newName, onChange: changeInputValue(setNewName)},
