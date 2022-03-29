@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 
-const persons = [
+let pers = [
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -24,20 +24,22 @@ const persons = [
     }
 ]
 
-const getPerById = id => persons.find(p => p.id === Number(id)) 
+const getPerById = id => pers.find(p => p.id === Number(id)) 
 const sendJsonOr404 = (res, o) => o ? res.json(o) : res.status(404).end()
+const delPer = id => pers = pers.filter(p => p.id !== Number(id))
+const hdlDel = (req, res) => (delPer(req.params.id), res.status(204).end()) 
+const hdlGetPer = (req, res) => sendJsonOr404(res, getPerById(req.params.id))  
 
-app.get('/api/persons', (req, res) => res.json(persons))
-app.get('/api/persons/:id', (req, res) => sendJsonOr404(res, getPerById(req.params.id)))
+app.get('/api/persons', (req, res) => res.json(pers))
+app.get('/api/persons/:id', hdlGetPer)
+app.delete('/api/persons/:id', hdlDel)
 
 app.get('/api/info', (req, res) => res.send(`
     <div>
-        <p>Phonebook has info for ${persons.length} people</p>
+        <p>Phonebook has info for ${pers.length} people</p>
         <p>${new Date()}</p>
     </div>
 `))
 
 const PORT = 3001
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-})
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
