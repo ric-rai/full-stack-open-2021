@@ -24,15 +24,22 @@ let pers = [
     }
 ]
 
+app.use(express.json())
+
 const getPerById = id => pers.find(p => p.id === Number(id)) 
 const sendJsonOr404 = (res, o) => o ? res.json(o) : res.status(404).end()
 const delPer = id => pers = pers.filter(p => p.id !== Number(id))
+const setNewId = p => (p.id = Math.round(Math.random() * 1000000000000), p)
+const addPer = p => (pers = pers.concat(setNewId(p)), pers)
+
 const hdlDel = (req, res) => (delPer(req.params.id), res.status(204).end()) 
-const hdlGetPer = (req, res) => sendJsonOr404(res, getPerById(req.params.id))  
+const hdlGetPer = (req, res) => sendJsonOr404(res, getPerById(req.params.id))
+const hdlPost = (req, res) => (console.log(req), res.json(addPer(req.body))) 
 
 app.get('/api/persons', (req, res) => res.json(pers))
 app.get('/api/persons/:id', hdlGetPer)
 app.delete('/api/persons/:id', hdlDel)
+app.post('/api/persons', hdlPost)
 
 app.get('/api/info', (req, res) => res.send(`
     <div>
