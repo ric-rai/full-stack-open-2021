@@ -24,9 +24,11 @@ const persons = [
     }
 ]
 
-app.get('/api/persons', (req, res) => {
-    res.json(persons)
-})
+const getPerById = id => persons.find(p => p.id === Number(id)) 
+const sendJsonOr404 = (res, o) => o ? res.json(o) : res.status(404).end()
+
+app.get('/api/persons', (req, res) => res.json(persons))
+app.get('/api/persons/:id', (req, res) => sendJsonOr404(res, getPerById(req.params.id)))
 
 app.get('/api/info', (req, res) => res.send(`
     <div>
