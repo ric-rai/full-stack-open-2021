@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 
-let pers = [
+let persons = [
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -26,24 +26,39 @@ let pers = [
 
 app.use(express.json())
 
-const getPerById = id => pers.find(p => p.id === Number(id)) 
-const sendJsonOr404 = (res, o) => o ? res.json(o) : res.status(404).end()
-const delPer = id => pers = pers.filter(p => p.id !== Number(id))
-const setNewId = p => (p.id = Math.round(Math.random() * 1000000000000), p)
-const addPer = p => (pers = pers.concat(setNewId(p)), pers)
+const handleDelete = (req, res) => {
+  persons = persons.filter(p => p.id !== Number(req.params.id))
+  res.status(204).end()
+} 
+const handleGetPerson = (req, res) => {
+  const person = persons.find(p => p.id === Number(req.params.id)) 
+  person ? res.json(person) : res.status(404).end()
 
-const hdlDel = (req, res) => (delPer(req.params.id), res.status(204).end()) 
-const hdlGetPer = (req, res) => sendJsonOr404(res, getPerById(req.params.id))
-const hdlPost = (req, res) => (console.log(req), res.json(addPer(req.body))) 
+}
+const handlePost = (req, res) => {
+  const send400 = msg => res.status(400).json({error: msg}) 
+  const pExists = p => persons.some(per => per.name === p.name)
+  const isObjEmpty = obj => !Object.keys(obj).length 
+  const person = req.body
+  if (isObjEmpty(person)) send400("Response body is missing") 
+  else if (!person?.name) send400("Name is missing") 
+  else if (pExists(person)) send400("Name must be unique") 
+  else if (!person?.number) send400("Number is missing") 
+  else {
+    person.id = Math.round(Math.random() * 1000000000000)
+    persons = persons.concat(person)
+    res.status(201).json(person)
+  }
+}
 
-app.get('/api/persons', (req, res) => res.json(pers))
-app.get('/api/persons/:id', hdlGetPer)
-app.delete('/api/persons/:id', hdlDel)
-app.post('/api/persons', hdlPost)
+app.get('/api/persons', (req, res) => res.json(persons))
+app.get('/api/persons/:id', handleGetPerson)
+app.delete('/api/persons/:id', handleDelete)
+app.post('/api/persons', handlePost)
 
 app.get('/api/info', (req, res) => res.send(`
     <div>
-        <p>Phonebook has info for ${pers.length} people</p>
+        <p>Phonebook has info for ${persons.length} people</p>
         <p>${new Date()}</p>
     </div>
 `))
