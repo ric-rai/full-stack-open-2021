@@ -25,7 +25,16 @@ let persons = [
     }
 ]
 
-app.use(express.json(), morgan('tiny'))
+app.use(express.json(), morgan((tokens, req, res) => {
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+    req.method === 'POST' ? JSON.stringify(req.body) : ''
+  ].join(' ')
+}))
 
 const handleDelete = (req, res) => {
   persons = persons.filter(p => p.id !== Number(req.params.id))
@@ -40,7 +49,7 @@ const handlePost = (req, res) => {
   const send400 = msg => res.status(400).json({error: msg}) 
   const pExists = p => persons.some(per => per.name === p.name)
   const isObjEmpty = obj => !Object.keys(obj).length 
-  const person = req.body
+  const person = {...req.body}
   if (isObjEmpty(person)) send400("Response body is missing") 
   else if (!person?.name) send400("Name is missing") 
   else if (pExists(person)) send400("Name must be unique") 
