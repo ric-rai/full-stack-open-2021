@@ -26,7 +26,7 @@ let persons = [
     }
 ]
 
-app.use(express.json(), cors())
+app.use(express.json(), cors(), express.static('build'))
 app.use(morgan((tokens, req, res) => [
     tokens.method(req, res),
     tokens.url(req, res),
