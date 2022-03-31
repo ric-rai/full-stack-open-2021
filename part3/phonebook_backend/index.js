@@ -1,5 +1,6 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const app = express()
 
 let persons = [
@@ -25,8 +26,8 @@ let persons = [
     }
 ]
 
-app.use(express.json(), morgan((tokens, req, res) => {
-  return [
+app.use(express.json(), cors())
+app.use(morgan((tokens, req, res) => [
     tokens.method(req, res),
     tokens.url(req, res),
     tokens.status(req, res),
@@ -34,7 +35,7 @@ app.use(express.json(), morgan((tokens, req, res) => {
     tokens['response-time'](req, res), 'ms',
     req.method === 'POST' ? JSON.stringify(req.body) : ''
   ].join(' ')
-}))
+))
 
 const handleDelete = (req, res) => {
   persons = persons.filter(p => p.id !== Number(req.params.id))

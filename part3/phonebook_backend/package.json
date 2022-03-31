@@ -11,10 +11,11 @@
     "author": "Ric Rai",
     "license": "MIT",
     "dependencies": {
-        "express": "^4.17.3"
+        "cors": "^2.8.5",
+        "express": "^4.17.3",
+        "morgan": "^1.10.0"
     },
     "devDependencies": {
-        "morgan": "^1.10.0",
         "nodemon": "^2.0.15"
     }
 }
