@@ -1,0 +1,33 @@
+### Get all
+GET https://ric-rai-phonebook-backend.herokuapp.com/api/persons
+
+### Delete
+DELETE  https://ric-rai-phonebook-backend.herokuapp.com/api/persons/1
+
+### Post
+POST  https://ric-rai-phonebook-backend.herokuapp.com/api/persons HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Person",
+    "number": "0123456789" 
+}
+
+### Body is missing
+POST  https://ric-rai-phonebook-backend.herokuapp.com/api/persons HTTP/1.1
+
+### Name is missing
+POST  https://ric-rai-phonebook-backend.herokuapp.com/api/persons HTTP/1.1
+content-type: application/json
+
+{
+    "number": "0123456789" 
+}
+
+### Number is missing
+POST  https://ric-rai-phonebook-backend.herokuapp.com/api/persons HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Person"
+}
